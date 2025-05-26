@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox fx:controller="com.evenements.gui.MainApp" xmlns:fx="http://javafx.com/fxml" spacing="10" styleClass="root">
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+
+    <Label text="Gestion d'Événements" styleClass="title-label"/>
+
+    <HBox spacing="10">
+        <VBox spacing="5" styleClass="form-section">
+            <Label text="Liste des Événements"/>
+            <ListView fx:id="evenementListView" prefHeight="300" prefWidth="300"/>
+            <Button text="Supprimer Événement" onAction="#supprimerEvenement" styleClass="button-danger"/>
+        </VBox>
+
+        <VBox spacing="5" styleClass="form-section">
+            <Label text="Ajouter un Événement"/>
+            <TextField fx:id="idField" promptText="ID"/>
+            <TextField fx:id="nomField" promptText="Nom"/>
+            <TextField fx:id="lieuField" promptText="Lieu"/>
+            <TextField fx:id="capaciteField" promptText="Capacité"/>
+            <ComboBox fx:id="typeComboBox" promptText="Type"/>
+            <TextField fx:id="artisteOrateurField" promptText="Artiste/Orateur"/>
+            <TextField fx:id="genreThemeField" promptText="Genre/Thème"/>
+            <Button text="Ajouter Événement" onAction="#ajouterEvenement" styleClass="button-primary"/>
+        </VBox>
+    </HBox>
+
+    <VBox spacing="5" styleClass="form-section">
+        <Label text="Ajouter un Participant"/>
+        <TextField fx:id="participantNomField" promptText="Nom du Participant"/>
+        <TextField fx:id="participantEmailField" promptText="Email du Participant"/>
+        <Button text="Inscrire Participant" onAction="#ajouterParticipant" styleClass="button-primary"/>
+    </VBox>
+
+    <Label fx:id="statusLabel" text="" styleClass="status-label"/>
+</VBox>
