@@ -1,6 +1,5 @@
 package com.evenements.gui;
 
-import com.evenements.exception.EvenementDejaExistantException;
 import com.evenements.model.Concert;
 import com.evenements.model.Conference;
 import com.evenements.model.Evenement;
@@ -24,6 +23,7 @@ import java.util.stream.Collectors;
  * Displays a table of events, a toolbar for event actions (add, edit, delete, cancel),
  * and a details panel showing event information and participants.
  */
+@SuppressWarnings("unchecked") // Suppress unchecked warnings for JavaFX internal raw types
 public class EventManagementView {
 
     // UI components and data
@@ -41,11 +41,6 @@ public class EventManagementView {
     private Label participantsDetail;
     private ListView<String> participantsList;
 
-    /**
-     * Constructs the event management view.
-     * Initializes the GestionEvenements singleton, sets up the events list,
-     * and builds the UI.
-     */
     public EventManagementView() {
         gestion = GestionEvenements.getInstance();
         eventsList = FXCollections.observableArrayList();
@@ -55,10 +50,6 @@ public class EventManagementView {
 
     // UI Setup Methods
 
-    /**
-     * Initializes the main UI layout using a BorderPane.
-     * Sets up the toolbar at the top and the main content in the center.
-     */
     private void initializeUI() {
         root = new BorderPane();
         root.setPadding(new Insets(15));
@@ -67,13 +58,6 @@ public class EventManagementView {
         root.setCenter(createMainContent());
     }
 
-    /**
-     * Creates the toolbar with buttons for event actions and filters.
-     * Includes buttons for adding, editing, deleting, and canceling events,
-     * as well as a search field and a filter dropdown.
-     *
-     * @return the HBox containing the toolbar components
-     */
     private HBox createToolbar() {
         HBox toolbar = new HBox(10);
         toolbar.setPadding(new Insets(10));
@@ -110,12 +94,6 @@ public class EventManagementView {
         return toolbar;
     }
 
-    /**
-     * Creates the main content area with a split pane.
-     * The left side contains the events table, and the right side contains the details panel.
-     *
-     * @return the SplitPane containing the table and details
-     */
     private SplitPane createMainContent() {
         SplitPane splitPane = new SplitPane();
         splitPane.setOrientation(Orientation.HORIZONTAL);
@@ -125,12 +103,6 @@ public class EventManagementView {
         return splitPane;
     }
 
-    /**
-     * Creates the table to display events.
-     * The table includes columns for ID, name, type, date, location, capacity, and status.
-     *
-     * @return the VBox containing the events table
-     */
     private VBox createEventsTable() {
         eventsTable = new TableView<>();
         eventsTable.setItems(eventsList);
@@ -156,13 +128,6 @@ public class EventManagementView {
         return new VBox(eventsTable);
     }
 
-    /**
-     * Creates the details panel to display information about the selected event.
-     * Includes labels for event name, type, date, location, capacity, and participant count,
-     * as well as a list of participant names.
-     *
-     * @return the VBox containing the details panel
-     */
     private VBox createEventDetails() {
         VBox detailsPanel = new VBox(10);
         detailsPanel.setPadding(new Insets(15));
@@ -194,9 +159,6 @@ public class EventManagementView {
 
     // Event Handling Methods
 
-    /**
-     * Loads all events from GestionEvenements into the table.
-     */
     void loadEvents() {
         eventsList.clear();
         for (Evenement e : gestion.getTousLesEvenements()) {
@@ -204,11 +166,6 @@ public class EventManagementView {
         }
     }
 
-    /**
-     * Filters events based on the selected filter option.
-     *
-     * @param filter the filter option ("Tous", "Conférences", "Concerts", "Actifs", "Annulés")
-     */
     private void filterEvents(String filter) {
         eventsList.clear();
         List<Evenement> events;
@@ -239,26 +196,20 @@ public class EventManagementView {
         }
     }
 
-    /**
-     * Shows a dialog to add a new event.
-     * Adds the event to GestionEvenements and refreshes the table.
-     */
     private void showAddEventDialog() {
         new AddEventDialog(null).showDialog(event -> {
             try {
                 gestion.ajouterEvenement(event);
-            } catch (EvenementDejaExistantException e) {
-                throw new RuntimeException(e);
+                loadEvents();
+                showAlert("Succès", "Événement ajouté avec succès");
+                return null;
+            } catch (Exception e) {
+                showAlert("Erreur", "Erreur lors de l'ajout : " + e.getMessage());
+                return null;
             }
-            loadEvents();
-            showAlert("Succès", "Événement ajouté avec succès");
         });
     }
 
-    /**
-     * Edits the selected event using a dialog.
-     * Updates the event details and refreshes the table.
-     */
     private void editSelectedEvent() {
         EventTableItem selected = eventsTable.getSelectionModel().getSelectedItem();
         if (selected != null) {
@@ -268,6 +219,7 @@ public class EventManagementView {
                     event.modifierEvenement(updatedEvent.getNom(), updatedEvent.getDate(), updatedEvent.getLieu());
                     loadEvents();
                     showAlert("Succès", "Événement modifié avec succès");
+                    return null;
                 });
             }
         } else {
@@ -275,10 +227,6 @@ public class EventManagementView {
         }
     }
 
-    /**
-     * Deletes the selected event after user confirmation.
-     * Removes the event from GestionEvenements and refreshes the table.
-     */
     private void deleteSelectedEvent() {
         EventTableItem selected = eventsTable.getSelectionModel().getSelectedItem();
         if (selected != null && confirm("Supprimer l'événement ?")) {
@@ -291,10 +239,6 @@ public class EventManagementView {
         }
     }
 
-    /**
-     * Cancels the selected event after user confirmation.
-     * Marks the event as canceled in GestionEvenements and refreshes the table.
-     */
     private void cancelSelectedEvent() {
         EventTableItem selected = eventsTable.getSelectionModel().getSelectedItem();
         if (selected != null && confirm("Annuler l'événement ?")) {
@@ -307,11 +251,6 @@ public class EventManagementView {
         }
     }
 
-    /**
-     * Updates the details panel with information about the selected event.
-     *
-     * @param item the selected EventTableItem, or null to clear the details
-     */
     private void updateDetails(EventTableItem item) {
         if (item != null) {
             Evenement event = gestion.rechercherEvenement(item.getId()).orElse(null);
@@ -340,41 +279,21 @@ public class EventManagementView {
 
     // Utility Methods
 
-    /**
-     * Displays an information alert with the specified title and message.
-     *
-     * @param title the title of the alert
-     * @param message the message to display
-     */
     private void showAlert(String title, String message) {
         new Alert(Alert.AlertType.INFORMATION, message).showAndWait();
     }
 
-    /**
-     * Shows a confirmation dialog and returns whether the user confirmed.
-     *
-     * @param message the confirmation message
-     * @return true if the user clicks YES, false otherwise
-     */
     private boolean confirm(String message) {
         return new Alert(Alert.AlertType.CONFIRMATION, message, ButtonType.YES, ButtonType.NO)
                 .showAndWait().orElse(ButtonType.NO) == ButtonType.YES;
     }
 
-    /**
-     * Returns the root BorderPane of the view.
-     *
-     * @return the root BorderPane
-     */
     public BorderPane getRoot() {
         return root;
     }
 
     // Nested Class
 
-    /**
-     * A data model for table rows, representing an event in the TableView.
-     */
     public static class EventTableItem {
         private final String id;
         private final String nom;

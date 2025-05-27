@@ -1,77 +1,123 @@
 package com.evenements.gui;
 
-import com.evenements.factory.EvenementFactory;
+import com.evenements.model.Concert;
 import com.evenements.model.Conference;
 import com.evenements.model.Evenement;
-import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
-import javafx.stage.Stage;
+import javafx.util.Callback;
 
 import java.time.LocalDateTime;
-import java.util.function.Consumer;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 public class AddEventDialog {
     private Dialog<Evenement> dialog;
-    private Evenement existingEvent;
+    private TextField idField;
+    private TextField nameField;
+    private TextField dateField;
+    private TextField lieuField;
+    private TextField capaciteField;
+    private TextField themeField; // For Conference
+    private TextField artisteField; // For Concert
+    private TextField genreField; // For Concert
+    private ComboBox<String> typeCombo;
 
-    public AddEventDialog(Evenement existingEvent) {
-        this.existingEvent = existingEvent;
-        initialize();
-    }
-
-    private void initialize() {
+    public AddEventDialog(Evenement event) {
         dialog = new Dialog<>();
-        dialog.setTitle(existingEvent == null ? "Nouvel Événement" : "Modifier Événement");
+        dialog.setTitle(event == null ? "Ajouter un événement" : "Modifier un événement");
+        dialog.setHeaderText(event == null ? "Créer un nouvel événement" : "Modifier un événement existant");
 
+        // Set up the dialog buttons
         ButtonType saveButtonType = new ButtonType("Enregistrer", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(saveButtonType, ButtonType.CANCEL);
 
+        // Create the form layout
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
-        grid.setPadding(new Insets(20, 150, 10, 10));
 
-        TextField idField = new TextField(existingEvent != null ? existingEvent.getId() : "");
-        TextField nameField = new TextField(existingEvent != null ? existingEvent.getNom() : "");
-        ComboBox<String> typeCombo = new ComboBox<>();
+        idField = new TextField(event != null ? event.getId() : "");
+        idField.setPromptText("ID");
+        idField.setDisable(event != null); // ID cannot be edited
+
+        nameField = new TextField(event != null ? event.getNom() : "");
+        nameField.setPromptText("Nom");
+
+        dateField = new TextField(event != null ? event.getDate().toString() : "");
+        dateField.setPromptText("Date (yyyy-MM-dd HH:mm)");
+
+        lieuField = new TextField(event != null ? event.getLieu() : "");
+        lieuField.setPromptText("Lieu");
+
+        capaciteField = new TextField(event != null ? String.valueOf(event.getCapaciteMax()) : "");
+        capaciteField.setPromptText("Capacité");
+
+        typeCombo = new ComboBox<>();
         typeCombo.getItems().addAll("Conférence", "Concert");
-        typeCombo.setValue(existingEvent != null ? (existingEvent instanceof Conference ? "Conférence" : "Concert") : "Conférence");
-        DatePicker datePicker = new DatePicker();
-        TextField timeField = new TextField("10:00");
-        TextField lieuField = new TextField(existingEvent != null ? existingEvent.getLieu() : "");
-        TextField capaciteField = new TextField(existingEvent != null ? String.valueOf(existingEvent.getCapaciteMax()) : "100");
-        TextField extraField = new TextField();
+        typeCombo.setValue(event instanceof Conference ? "Conférence" : event instanceof Concert ? "Concert" : "Conférence");
 
-        grid.add(new Label("ID:"), 0, 0); grid.add(idField, 1, 0);
-        grid.add(new Label("Nom:"), 0, 1); grid.add(nameField, 1, 1);
-        grid.add(new Label("Type:"), 0, 2); grid.add(typeCombo, 1, 2);
-        grid.add(new Label("Date:"), 0, 3); grid.add(datePicker, 1, 3);
-        grid.add(new Label("Heure (HH:mm):"), 0, 4); grid.add(timeField, 1, 4);
-        grid.add(new Label("Lieu:"), 0, 5); grid.add(lieuField, 1, 5);
-        grid.add(new Label("Capacité:"), 0, 6); grid.add(capaciteField, 1, 6);
-        grid.add(new Label("Thème/Artiste:"), 0, 7); grid.add(extraField, 1, 7);
+        themeField = new TextField(event instanceof Conference ? ((Conference) event).getTheme() : "");
+        themeField.setPromptText("Thème (Conférence)");
+        themeField.setDisable(typeCombo.getValue().equals("Concert"));
+
+        artisteField = new TextField(event instanceof Concert ? ((Concert) event).getArtiste() : "");
+        artisteField.setPromptText("Artiste (Concert)");
+        artisteField.setDisable(typeCombo.getValue().equals("Conférence"));
+
+        genreField = new TextField(event instanceof Concert ? ((Concert) event).getGenre() : "");
+        genreField.setPromptText("Genre (Concert)");
+        genreField.setDisable(typeCombo.getValue().equals("Conférence"));
+
+        // Enable/disable fields based on event type
+        typeCombo.setOnAction(e -> {
+            themeField.setDisable(typeCombo.getValue().equals("Concert"));
+            artisteField.setDisable(typeCombo.getValue().equals("Conférence"));
+            genreField.setDisable(typeCombo.getValue().equals("Conférence"));
+        });
+
+        grid.add(new Label("Type:"), 0, 0);
+        grid.add(typeCombo, 1, 0);
+        grid.add(new Label("ID:"), 0, 1);
+        grid.add(idField, 1, 1);
+        grid.add(new Label("Nom:"), 0, 2);
+        grid.add(nameField, 1, 2);
+        grid.add(new Label("Date:"), 0, 3);
+        grid.add(dateField, 1, 3);
+        grid.add(new Label("Lieu:"), 0, 4);
+        grid.add(lieuField, 1, 4);
+        grid.add(new Label("Capacité:"), 0, 5);
+        grid.add(capaciteField, 1, 5);
+        grid.add(new Label("Thème:"), 0, 6);
+        grid.add(themeField, 1, 6);
+        grid.add(new Label("Artiste:"), 0, 7);
+        grid.add(artisteField, 1, 7);
+        grid.add(new Label("Genre:"), 0, 8);
+        grid.add(genreField, 1, 8);
 
         dialog.getDialogPane().setContent(grid);
 
+        // Validate input and create the event
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == saveButtonType) {
                 try {
-                    String[] timeParts = timeField.getText().split(":");
-                    LocalDateTime dateTime = datePicker.getValue().atTime(
-                            Integer.parseInt(timeParts[0]), Integer.parseInt(timeParts[1]));
-                    return EvenementFactory.creerEvenement(
-                            typeCombo.getValue().toLowerCase(),
-                            idField.getText(),
-                            nameField.getText(),
-                            dateTime,
-                            lieuField.getText(),
-                            Integer.parseInt(capaciteField.getText()),
-                            extraField.getText(),
-                            typeCombo.getValue().equals("Concert") ? "Rock" : null
-                    );
-                } catch (Exception e) {
-                    new Alert(Alert.AlertType.ERROR, "Erreur dans les données saisies").showAndWait();
+                    String id = validateField(idField.getText(), "ID");
+                    String name = validateField(nameField.getText(), "Nom");
+                    String lieu = validateField(lieuField.getText(), "Lieu");
+
+                    LocalDateTime date = validateDate(dateField.getText());
+                    int capacite = validateCapacity(capaciteField.getText());
+
+                    if (typeCombo.getValue().equals("Conférence")) {
+                        String theme = validateField(themeField.getText(), "Thème");
+                        return new Conference(id, name, date, lieu, capacite, theme);
+                    } else {
+                        String artiste = validateField(artisteField.getText(), "Artiste");
+                        String genre = validateField(genreField.getText(), "Genre");
+                        return new Concert(id, name, date, lieu, capacite, artiste, genre);
+                    }
+                } catch (IllegalArgumentException e) {
+                    showAlert("Erreur de saisie", e.getMessage());
                     return null;
                 }
             }
@@ -79,7 +125,47 @@ public class AddEventDialog {
         });
     }
 
-    public void showDialog(Consumer<Evenement> onSave) {
-        dialog.showAndWait().ifPresent(onSave);
+    private String validateField(String value, String fieldName) {
+        if (value == null || value.trim().isEmpty()) {
+            throw new IllegalArgumentException(fieldName + " ne peut pas être vide.");
+        }
+        return value.trim();
+    }
+
+    private LocalDateTime validateDate(String dateStr) {
+        try {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+            return LocalDateTime.parse(dateStr, formatter);
+        } catch (DateTimeParseException e) {
+            throw new IllegalArgumentException("Format de date invalide. Utilisez yyyy-MM-dd HH:mm (ex. 2025-05-27 14:30).");
+        }
+    }
+
+    private int validateCapacity(String capaciteStr) {
+        try {
+            int capacite = Integer.parseInt(capaciteStr);
+            if (capacite <= 0) {
+                throw new IllegalArgumentException("La capacité doit être un nombre positif.");
+            }
+            return capacite;
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("La capacité doit être un nombre entier valide.");
+        }
+    }
+
+    public void showDialog(Callback<Evenement, Void> callback) {
+        dialog.showAndWait().ifPresent(event -> {
+            if (event != null) {
+                callback.call(event);
+            }
+        });
+    }
+
+    private void showAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }

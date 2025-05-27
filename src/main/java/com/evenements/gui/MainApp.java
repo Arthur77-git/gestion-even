@@ -1,8 +1,5 @@
 package com.evenements.gui;
 
-import com.evenements.exception.CapaciteMaxAtteinteException;
-import com.evenements.exception.EvenementDejaExistantException;
-import com.evenements.exception.ParticipantDejaInscritException;
 import com.evenements.model.Concert;
 import com.evenements.model.Conference;
 import com.evenements.model.Evenement;
@@ -28,8 +25,8 @@ public class MainApp extends Application {
     private GestionEvenements gestion;
 
     @Override
-    public void start(Stage primaryStage) throws CapaciteMaxAtteinteException, ParticipantDejaInscritException, EvenementDejaExistantException {
-        // Initialize the GestionEvenements singleton
+    public void start(Stage primaryStage) {
+        // Initialize the GestionEvenements singleton (loads events from evenement.json)
         gestion = GestionEvenements.getInstance();
 
         // Create the event management view
@@ -43,9 +40,6 @@ public class MainApp extends Application {
         primaryStage.setTitle("Système de Gestion d'Événements");
         primaryStage.setScene(scene);
         primaryStage.show();
-
-        // Optional: Add sample data for testing
-        initializeSampleData();
     }
 
     @Override
@@ -53,23 +47,6 @@ public class MainApp extends Application {
         if (eventManagementView != null) {
             // Cleanup if needed (e.g., close resources)
         }
-    }
-
-    private void initializeSampleData() throws EvenementDejaExistantException, CapaciteMaxAtteinteException, ParticipantDejaInscritException {
-        // Add sample events
-        Conference conference = new Conference("C001", "Tech Conference", LocalDateTime.now().plusDays(1), "Room A", 50, "AI");
-        Concert concert = new Concert("C002", "Music Night", LocalDateTime.now().plusDays(2), "Hall B", 100, "Rock", "Pop");
-        gestion.ajouterEvenement(conference);
-        gestion.ajouterEvenement(concert);
-
-        // Add sample participants
-        Participant p1 = new Participant("P001", "John Doe", "john@example.com", null);
-        Participant p2 = new Participant("P002", "Jane Doe", "jane@example.com", null);
-        conference.ajouterParticipant(p1);
-        concert.ajouterParticipant(p2);
-
-        // Refresh the view
-        eventManagementView.loadEvents();
     }
 
     public static void main(String[] args) {

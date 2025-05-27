@@ -1,37 +1,21 @@
 package com.evenements.model;
 
-import com.evenements.exception.CapaciteMaxAtteinteException;
-import com.evenements.exception.ParticipantDejaInscritException;
-import com.evenements.service.NotificationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
-/**
- * Unit tests for the Concert class.
- */
 public class ConcertTest {
 
-    @Mock
-    private NotificationService notificationService;
-
-    @Mock
-    private Participant participant;
-
     private Concert concert;
+    private Participant participant;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
         concert = new Concert("CONC1", "Rock Fest", LocalDateTime.now(), "Stade", 50000, "Metallica", "Rock");
-        when(participant.getNom()).thenReturn("Alice");
-        when(participant.getEmail()).thenReturn("alice@email.com");
+        participant = new Participant("P001", "Alice", "alice@email.com");
     }
 
     @Test
@@ -41,38 +25,44 @@ public class ConcertTest {
         assertEquals("Stade", concert.getLieu());
         assertEquals(50000, concert.getCapaciteMax());
         assertEquals("Metallica", concert.getArtiste());
-        assertEquals("Rock", concert.getGenreMusical());
+        assertEquals("Rock", concert.getGenre());
     }
 
     @Test
-    void testAjouterParticipant() throws Exception {
-        concert.ajouterParticipant(participant);
+    void testAjouterParticipant() {
+        assertTrue(concert.ajouterParticipant(participant));
         assertEquals(1, concert.getParticipants().size());
-        verify(participant, times(1)).update("Vous êtes inscrit à l'événement: Rock Fest");
     }
 
     @Test
-    void testAjouterParticipantDejaInscrit() throws Exception {
+    void testAjouterParticipantDejaInscrit() {
         concert.ajouterParticipant(participant);
-        assertThrows(ParticipantDejaInscritException.class, () -> concert.ajouterParticipant(participant));
+        assertFalse(concert.ajouterParticipant(participant));
     }
 
     @Test
-    void testAnnuler() throws CapaciteMaxAtteinteException, ParticipantDejaInscritException {
+    void testAjouterParticipantCapaciteMaxAtteinte() {
+        // Set a small capacity for testing
+        concert = new Concert("CONC1", "Rock Fest", LocalDateTime.now(), "Stade", 1, "Metallica", "Rock");
+        concert.ajouterParticipant(participant);
+        Participant anotherParticipant = new Participant("P002", "Bob", "bob@email.com");
+        assertThrows(IllegalStateException.class, () -> concert.ajouterParticipant(anotherParticipant));
+    }
+
+    @Test
+    void testAnnuler() {
         concert.ajouterParticipant(participant);
         concert.annuler();
         assertTrue(concert.isAnnule());
-        verify(participant, times(1)).update("L'événement Rock Fest a été annulé");
     }
 
     @Test
-    void testModifierEvenement() throws CapaciteMaxAtteinteException, ParticipantDejaInscritException {
+    void testModifierEvenement() {
         concert.ajouterParticipant(participant);
         LocalDateTime newDate = LocalDateTime.now().plusDays(1);
         concert.modifierEvenement("New Fest", newDate, "New Stade");
         assertEquals("New Fest", concert.getNom());
         assertEquals(newDate, concert.getDate());
         assertEquals("New Stade", concert.getLieu());
-        verify(participant, times(1)).update("L'événement New Fest a été modifié");
     }
 }

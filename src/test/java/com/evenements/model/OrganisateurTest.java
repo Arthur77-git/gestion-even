@@ -1,30 +1,19 @@
 package com.evenements.model;
 
-import com.evenements.service.NotificationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
 
-/**
- * Unit tests for the Organisateur class.
- */
 public class OrganisateurTest {
-
-    @Mock
-    private NotificationService notificationService;
 
     private Organisateur organisateur;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
-        organisateur = new Organisateur("ORG1", "Claire Admin", "admin@events.com", notificationService);
+        organisateur = new Organisateur("ORG1", "Claire Admin", "admin@events.com");
     }
 
     @Test
@@ -78,11 +67,11 @@ public class OrganisateurTest {
 
     @Test
     void testEqualsAndHashCode() {
-        Organisateur other = new Organisateur("ORG1", "Different Name", "different@events.com", notificationService);
+        Organisateur other = new Organisateur("ORG1", "Different Name", "different@events.com");
         assertEquals(organisateur, other);
         assertEquals(organisateur.hashCode(), other.hashCode());
 
-        Organisateur different = new Organisateur("ORG2", "Claire Admin", "admin@events.com", notificationService);
+        Organisateur different = new Organisateur("ORG2", "Claire Admin", "admin@events.com");
         assertNotEquals(organisateur, different);
         assertNotEquals(organisateur.hashCode(), different.hashCode());
     }

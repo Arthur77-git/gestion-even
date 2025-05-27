@@ -23,10 +23,10 @@ public class EvenementFactory {
     }
 
     public static Participant creerParticipant(String id, String nom, String email, NotificationService notificationService) {
-        return new Participant(id, nom, email, notificationService);
+        return new Participant(id, nom, email/*, notificationService*/);
     }
 
     public static Organisateur creerOrganisateur(String id, String nom, String email, NotificationService notificationService) {
-        return new Organisateur(id, nom, email, notificationService);
+        return new Organisateur(id, nom, email/*, notificationService*/);
     }
 }

@@ -3,11 +3,12 @@ package com.evenements.factory;
 import com.evenements.model.Conference;
 import com.evenements.model.Evenement;
 import com.evenements.model.Participant;
-import com.evenements.service.EmailNotificationService;
+import com.evenements.service.NotificationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
+import java.util.concurrent.CompletableFuture;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -15,7 +16,7 @@ public class EvenementFactoryTest {
 
     @BeforeEach
     void setUp() {
-        // Reset any singleton or state if needed
+        // No singleton reset needed for factory
     }
 
     @Test
@@ -31,13 +32,23 @@ public class EvenementFactoryTest {
 
     @Test
     void testCreerParticipant() {
+        NotificationService mockService = new NotificationService() {
+            @Override
+            public void envoyerNotification(String message) {
+
+            }
+
+            @Override
+            public CompletableFuture<Void> envoyerNotificationAsync(String message) {
+                return CompletableFuture.completedFuture(null);
+            }
+        }; // Mock implementation
         Participant participant = EvenementFactory.creerParticipant(
-                "P001", "John Doe", "john@example.com", new EmailNotificationService()
+                "P001", "John Doe", "john@example.com", mockService
         );
         assertNotNull(participant);
         assertEquals("P001", participant.getId());
         assertEquals("John Doe", participant.getNom());
         assertEquals("john@example.com", participant.getEmail());
-        assertNotNull(participant.getNotificationService()); // Verify presence
     }
 }

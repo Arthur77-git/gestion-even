@@ -1,6 +1,7 @@
 package com.evenements.gui;
 
 import com.evenements.model.Concert;
+import com.evenements.model.Conference;
 import com.evenements.model.Evenement;
 import com.evenements.singleton.GestionEvenements;
 import javafx.geometry.Insets;
@@ -60,7 +61,7 @@ public class DashboardView {
         PieChart pieChart = new PieChart();
         pieChart.setPrefSize(400, 300);
 
-        long conferences = gestion.getTousLesEvenements().stream().filter(e -> e instanceof Concert).count();
+        long conferences = gestion.getTousLesEvenements().stream().filter(e -> e instanceof Conference).count();
         long concerts = gestion.getTousLesEvenements().size() - conferences;
 
         pieChart.getData().addAll(

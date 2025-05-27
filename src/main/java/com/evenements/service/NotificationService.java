@@ -3,12 +3,10 @@ package com.evenements.service;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * Interface for notification services.
+ * Interface for sending notifications to participants.
  */
 public interface NotificationService {
     void envoyerNotification(String message);
 
-    default CompletableFuture<Void> envoyerNotificationAsync(String message) {
-        return CompletableFuture.runAsync(() -> envoyerNotification(message));
-    }
+    CompletableFuture<Void> envoyerNotificationAsync(String asyncMessage);
 }

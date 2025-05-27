@@ -1,42 +1,18 @@
-/**
- * Represents a participant in an event, capable of receiving notifications.
- */
 package com.evenements.model;
 
-import com.evenements.observer.ParticipantObserver;
-import com.evenements.service.NotificationService;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import javax.xml.bind.annotation.*;
 import java.util.Objects;
 
-@XmlRootElement
-@XmlAccessorType(XmlAccessType.FIELD)
-public class Participant implements ParticipantObserver {
-    @XmlElement
+/**
+ * Represents a participant in an event.
+ */
+public class Participant {
     private String id;
-
-    @XmlElement
     private String nom;
-
-    @XmlElement
     private String email;
-
-    @XmlTransient
-    @JsonIgnore
-    private NotificationService notificationService;
 
     public Participant() {}
 
-    /**
-     * Constructs a Participant with the specified details.
-     * @param id Unique identifier of the participant
-     * @param nom Name of the participant
-     * @param email Email address of the participant
-     * @param notificationService Service to send notifications
-     * @throws IllegalArgumentException if id, nom, or email is invalid
-     */
-    public Participant(String id, String nom, String email, NotificationService notificationService) {
+    public Participant(String id, String nom, String email) {
         if (id == null || id.trim().isEmpty()) {
             throw new IllegalArgumentException("ID cannot be null or empty");
         }
@@ -49,14 +25,6 @@ public class Participant implements ParticipantObserver {
         this.id = id;
         this.nom = nom;
         this.email = email;
-        this.notificationService = notificationService;
-    }
-
-    @Override
-    public void update(String message) {
-        if (notificationService != null) {
-            notificationService.envoyerNotification("Notification pour " + nom + " (" + email + "): " + message);
-        }
     }
 
     public String getId() { return id; }
@@ -65,10 +33,6 @@ public class Participant implements ParticipantObserver {
     public void setNom(String nom) { this.nom = nom; }
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
-    public NotificationService getNotificationService() { return notificationService; }
-    public void setNotificationService(NotificationService notificationService) {
-        this.notificationService = notificationService;
-    }
 
     @Override
     public boolean equals(Object o) {
@@ -87,4 +51,5 @@ public class Participant implements ParticipantObserver {
     public String toString() {
         return "Participant{id='" + id + "', nom='" + nom + "', email='" + email + "'}";
     }
+
 }

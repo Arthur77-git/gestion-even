@@ -1,21 +1,11 @@
 package com.evenements.model;
 
-import com.evenements.service.NotificationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
-/**
- * Unit tests for the Participant class.
- */
 public class ParticipantTest {
-
-    @Mock
-    private NotificationService notificationService;
 
     private Participant participant;
     private final String id = "1";
@@ -24,8 +14,7 @@ public class ParticipantTest {
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
-        participant = new Participant(id, nom, email, notificationService);
+        participant = new Participant(id, nom, email);
     }
 
     @Test
@@ -33,7 +22,6 @@ public class ParticipantTest {
         assertEquals(id, participant.getId());
         assertEquals(nom, participant.getNom());
         assertEquals(email, participant.getEmail());
-        assertEquals(notificationService, participant.getNotificationService());
     }
 
     @Test
@@ -49,32 +37,14 @@ public class ParticipantTest {
         String newId = "2";
         String newNom = "Jane Doe";
         String newEmail = "jane@example.com";
-        NotificationService newNotificationService = mock(NotificationService.class);
 
         participant.setId(newId);
         participant.setNom(newNom);
         participant.setEmail(newEmail);
-        participant.setNotificationService(newNotificationService);
 
         assertEquals(newId, participant.getId());
         assertEquals(newNom, participant.getNom());
         assertEquals(newEmail, participant.getEmail());
-        assertEquals(newNotificationService, participant.getNotificationService());
-    }
-
-    @Test
-    void testUpdateWithNotificationService() {
-        String message = "Test message";
-        participant.update(message);
-        verify(notificationService, times(1))
-                .envoyerNotification("Notification pour " + nom + " (" + email + "): " + message);
-    }
-
-    @Test
-    void testUpdateWithoutNotificationService() {
-        participant = new Participant(id, nom, email, null);
-        participant.update("Test message");
-        verifyNoInteractions(notificationService);
     }
 
     @Test
@@ -84,13 +54,13 @@ public class ParticipantTest {
 
     @Test
     void testEqualsSameId() {
-        Participant other = new Participant(id, "Different Name", "different@example.com", null);
+        Participant other = new Participant(id, "Different Name", "different@example.com");
         assertTrue(participant.equals(other));
     }
 
     @Test
     void testEqualsDifferentId() {
-        Participant other = new Participant("2", nom, email, notificationService);
+        Participant other = new Participant("2", nom, email);
         assertFalse(participant.equals(other));
     }
 
@@ -106,13 +76,13 @@ public class ParticipantTest {
 
     @Test
     void testHashCodeConsistency() {
-        Participant other = new Participant(id, "Different Name", "different@example.com", null);
+        Participant other = new Participant(id, "Different Name", "different@example.com");
         assertEquals(participant.hashCode(), other.hashCode());
     }
 
     @Test
     void testHashCodeDifferentId() {
-        Participant other = new Participant("2", nom, email, notificationService);
+        Participant other = new Participant("2", nom, email);
         assertNotEquals(participant.hashCode(), other.hashCode());
     }
 
@@ -124,19 +94,19 @@ public class ParticipantTest {
 
     @Test
     void testConstructorWithInvalidId() {
-        assertThrows(IllegalArgumentException.class, () -> new Participant(null, nom, email, notificationService));
-        assertThrows(IllegalArgumentException.class, () -> new Participant("", nom, email, notificationService));
+        assertThrows(IllegalArgumentException.class, () -> new Participant(null, nom, email));
+        assertThrows(IllegalArgumentException.class, () -> new Participant("", nom, email));
     }
 
     @Test
     void testConstructorWithInvalidNom() {
-        assertThrows(IllegalArgumentException.class, () -> new Participant(id, null, email, notificationService));
-        assertThrows(IllegalArgumentException.class, () -> new Participant(id, "", email, notificationService));
+        assertThrows(IllegalArgumentException.class, () -> new Participant(id, null, email));
+        assertThrows(IllegalArgumentException.class, () -> new Participant(id, "", email));
     }
 
     @Test
     void testConstructorWithInvalidEmail() {
-        assertThrows(IllegalArgumentException.class, () -> new Participant(id, nom, "invalid-email", notificationService));
-        assertThrows(IllegalArgumentException.class, () -> new Participant(id, nom, null, notificationService));
+        assertThrows(IllegalArgumentException.class, () -> new Participant(id, nom, "invalid-email"));
+        assertThrows(IllegalArgumentException.class, () -> new Participant(id, nom, null));
     }
 }
