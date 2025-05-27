@@ -20,7 +20,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-@JsonTypeInfo(use = JsonTypeInfo.As.PROPERTY, property = "type")
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME,
+        include=JsonTypeInfo.As.PROPERTY,
+        property = "type")
 @JsonSubTypes({
         @JsonSubTypes.Type(value = Conference.class, name = "conference"),
         @JsonSubTypes.Type(value = Concert.class, name = "concert")
@@ -92,7 +94,7 @@ public abstract class Evenement implements EvenementObservable {
         this.annule = false;
     }
 
-    public void ajouterParticipant(Participant participant) throws CapaciteMaxAtteinteException, ParticipantDejaInscritException {
+    public boolean ajouterParticipant(Participant participant) throws CapaciteMaxAtteinteException, ParticipantDejaInscritException {
         if (annule) {
             throw new IllegalStateException("Impossible d'ajouter un participant à un événement annulé");
         }
@@ -105,6 +107,7 @@ public abstract class Evenement implements EvenementObservable {
         participants.add(participant);
         ajouterObserver(participant);
         notifierObservers("Vous êtes inscrit à l'événement: " + nom);
+        return false;
     }
 
     public void supprimerParticipant(Participant participant) {

@@ -33,6 +33,7 @@ public class ParticipantTest {
         assertEquals(id, participant.getId());
         assertEquals(nom, participant.getNom());
         assertEquals(email, participant.getEmail());
+        assertEquals(notificationService, participant.getNotificationService());
     }
 
     @Test

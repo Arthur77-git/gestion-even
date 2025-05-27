@@ -1,5 +1,7 @@
 package com.evenements.service;
 
+import java.util.concurrent.CompletableFuture;
+
 /**
  * Interface for notification services.
  */

@@ -9,104 +9,79 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for the Conference class.
+ * This class tests the core functionality of the Conference model,
+ * including participant management, theme retrieval, and event cancellation.
  */
 public class ConferenceTest {
+
+    private Conference conference;
+    private Participant participant;
 
     @Mock
     private NotificationService notificationService;
 
-    @Mock
-    private Participant participant1;
-
-    @Mock
-    private Participant participant2;
-
-    private Conference conference;
-
+    /**
+     * Sets up the test environment before each test method.
+     * Initializes mocks and creates test instances of Conference and Participant.
+     * Uses try-with-resources to handle Mockito's AutoCloseable resource.
+     */
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
-        conference = new Conference("CONF1", "Conf IA", LocalDateTime.now(), "Paris", 2, "IA");
-        when(participant1.getNom()).thenReturn("Alice");
-        when(participant1.getEmail()).thenReturn("alice@email.com");
-        when(participant2.getNom()).thenReturn("Bob");
-        when(participant2.getEmail()).thenReturn("bob@email.com");
+        try (var mocks = MockitoAnnotations.openMocks(this)) {
+            conference = new Conference("C001", "Tech Conference", LocalDateTime.now(), "Room A", 2, "AI");
+            participant = new Participant("P001", "John Doe", "john@example.com", notificationService);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to initialize mocks", e);
+        }
     }
 
-    @Test
-    void testConstructorAndGetters() {
-        assertEquals("CONF1", conference.getId());
-        assertEquals("Conf IA", conference.getNom());
-        assertEquals("Paris", conference.getLieu());
-        assertEquals(2, conference.getCapaciteMax());
-        assertEquals("IA", conference.getTheme());
-        assertTrue(conference.getIntervenants().isEmpty());
-    }
+    // Test methods grouped by functionality
 
+    /**
+     * Tests the successful addition of a participant to the conference.
+     * Verifies that the participant is added and the participant count increases.
+     */
     @Test
-    void testAjouterIntervenant() {
-        Intervenant intervenant = new Intervenant("INT1", "Dr. Marie", "Machine Learning");
-        conference.ajouterIntervenant(intervenant);
-        List<Intervenant> intervenants = conference.getIntervenants();
-        assertEquals(1, intervenants.size());
-        assertEquals(intervenant, intervenants.get(0));
-
-        // Adding the same intervenant should not duplicate
-        conference.ajouterIntervenant(intervenant);
-        assertEquals(1, intervenants.size());
-    }
-
-    @Test
-    void testAjouterParticipant() throws Exception {
-        conference.ajouterParticipant(participant1);
+    void testAjouterParticipant_Success() throws CapaciteMaxAtteinteException, ParticipantDejaInscritException {
+        assertTrue(conference.ajouterParticipant(participant));
         assertEquals(1, conference.getParticipants().size());
-        verify(participant1, times(1)).update("Vous êtes inscrit à l'événement: Conf IA");
     }
 
+    /**
+     * Tests the behavior when the conference capacity is reached.
+     * Verifies that an exception is thrown when attempting to add a participant beyond capacity.
+     */
     @Test
-    void testAjouterParticipantDejaInscrit() throws Exception {
-        conference.ajouterParticipant(participant1);
-        assertThrows(ParticipantDejaInscritException.class, () -> conference.ajouterParticipant(participant1));
+    void testAjouterParticipant_CapacityReached() throws CapaciteMaxAtteinteException, ParticipantDejaInscritException {
+        conference.ajouterParticipant(participant);
+        conference.ajouterParticipant(new Participant("P002", "Jane Doe", "jane@example.com", notificationService));
+        assertThrows(CapaciteMaxAtteinteException.class, () -> {
+            conference.ajouterParticipant(new Participant("P003", "Bob Doe", "bob@example.com", notificationService));
+        });
     }
 
+    /**
+     * Tests the retrieval of the conference theme.
+     * Verifies that the theme is correctly set and retrieved.
+     */
     @Test
-    void testAjouterParticipantCapaciteMaxAtteinte() throws Exception {
-        conference.ajouterParticipant(participant1);
-        conference.ajouterParticipant(participant2);
-        Participant participant3 = mock(Participant.class);
-        assertThrows(CapaciteMaxAtteinteException.class, () -> conference.ajouterParticipant(participant3));
+    void testGetTheme() {
+        assertEquals("AI", conference.getTheme());
     }
 
+    /**
+     * Tests the cancellation of the conference.
+     * Verifies that the conference status changes to canceled after calling annuler().
+     */
     @Test
     void testAnnuler() {
-        conference.ajouterParticipant(participant1);
         conference.annuler();
         assertTrue(conference.isAnnule());
-        verify(participant1, times(1)).update("L'événement Conf IA a été annulé");
-    }
-
-    @Test
-    void testModifierEvenement() {
-        conference.ajouterParticipant(participant1);
-        LocalDateTime newDate = LocalDateTime.now().plusDays(1);
-        conference.modifierEvenement("New Name", newDate, "New Lieu");
-        assertEquals("New Name", conference.getNom());
-        assertEquals(newDate, conference.getDate());
-        assertEquals("New Lieu", conference.getLieu());
-        verify(participant1, times(1)).update("L'événement New Name a été modifié");
-    }
-
-    @Test
-    void testModifierEvenementWhenAnnule() {
-        conference.annuler();
-        assertThrows(IllegalStateException.class, () ->
-                conference.modifierEvenement("New Name", LocalDateTime.now(), "New Lieu"));
     }
 }

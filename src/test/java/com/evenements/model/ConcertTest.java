@@ -58,7 +58,7 @@ public class ConcertTest {
     }
 
     @Test
-    void testAnnuler() {
+    void testAnnuler() throws CapaciteMaxAtteinteException, ParticipantDejaInscritException {
         concert.ajouterParticipant(participant);
         concert.annuler();
         assertTrue(concert.isAnnule());
@@ -66,7 +66,7 @@ public class ConcertTest {
     }
 
     @Test
-    void testModifierEvenement() {
+    void testModifierEvenement() throws CapaciteMaxAtteinteException, ParticipantDejaInscritException {
         concert.ajouterParticipant(participant);
         LocalDateTime newDate = LocalDateTime.now().plusDays(1);
         concert.modifierEvenement("New Fest", newDate, "New Stade");

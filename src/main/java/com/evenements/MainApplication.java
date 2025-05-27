@@ -6,7 +6,7 @@ import com.evenements.model.*;
 import com.evenements.serialization.JsonSerializer;
 import com.evenements.serialization.XmlSerializer;
 import com.evenements.service.EmailNotificationService;
-import com.evenements.service.GestionEvenements;
+import com.evenements.singleton.GestionEvenements;
 import com.evenements.service.SMSNotificationService;
 
 import java.time.LocalDateTime;
