@@ -1,4 +1,6 @@
-
+/**
+ * Represents a conference event.
+ */
 package com.evenements.model;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
@@ -26,8 +28,21 @@ public class Conference extends Evenement {
         this.intervenants = new ArrayList<>();
     }
 
+    /**
+     * Constructs a Conference with the specified details.
+     * @param id Unique identifier of the conference
+     * @param nom Name of the conference
+     * @param date Date and time of the conference
+     * @param lieu Location of the conference
+     * @param capaciteMax Maximum capacity of the conference
+     * @param theme Theme of the conference
+     * @throws IllegalArgumentException if theme is invalid
+     */
     public Conference(String id, String nom, LocalDateTime date, String lieu, int capaciteMax, String theme) {
         super(id, nom, date, lieu, capaciteMax);
+        if (theme == null || theme.trim().isEmpty()) {
+            throw new IllegalArgumentException("Theme cannot be null or empty");
+        }
         this.theme = theme;
         this.intervenants = new ArrayList<>();
     }
@@ -44,7 +59,7 @@ public class Conference extends Evenement {
         System.out.println("Statut: " + (annule ? "ANNULÉ" : "ACTIF"));
         if (!intervenants.isEmpty()) {
             System.out.println("Intervenants:");
-            intervenants.forEach(i -> System.out.println("- " + i.getNom()));
+            intervenants.stream().forEach(i -> System.out.println("- " + i.getNom()));
         }
     }
 

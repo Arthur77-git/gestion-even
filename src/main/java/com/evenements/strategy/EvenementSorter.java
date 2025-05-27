@@ -3,6 +3,9 @@ package com.evenements.strategy;
 import com.evenements.model.Evenement;
 import java.util.List;
 
+/**
+ * Class to sort events using a specified strategy.
+ */
 public class EvenementSorter {
     private TriStrategy strategy;
 

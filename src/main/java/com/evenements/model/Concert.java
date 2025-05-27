@@ -1,3 +1,6 @@
+/**
+ * Represents a concert event.
+ */
 package com.evenements.model;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
@@ -22,8 +25,25 @@ public class Concert extends Evenement {
         super();
     }
 
+    /**
+     * Constructs a Concert with the specified details.
+     * @param id Unique identifier of the concert
+     * @param nom Name of the concert
+     * @param date Date and time of the concert
+     * @param lieu Location of the concert
+     * @param capaciteMax Maximum capacity of the concert
+     * @param artiste Artist performing at the concert
+     * @param genreMusical Musical genre of the concert
+     * @throws IllegalArgumentException if artiste or genreMusical is invalid
+     */
     public Concert(String id, String nom, LocalDateTime date, String lieu, int capaciteMax, String artiste, String genreMusical) {
         super(id, nom, date, lieu, capaciteMax);
+        if (artiste == null || artiste.trim().isEmpty()) {
+            throw new IllegalArgumentException("Artist cannot be null or empty");
+        }
+        if (genreMusical == null || genreMusical.trim().isEmpty()) {
+            throw new IllegalArgumentException("Musical genre cannot be null or empty");
+        }
         this.artiste = artiste;
         this.genreMusical = genreMusical;
     }

@@ -2,6 +2,9 @@ package com.evenements.service;
 
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * Service for sending notifications via email.
+ */
 public class EmailNotificationService implements NotificationService {
     @Override
     public void envoyerNotification(String message) {

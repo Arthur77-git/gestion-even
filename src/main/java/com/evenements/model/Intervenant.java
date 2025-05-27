@@ -1,4 +1,6 @@
-
+/**
+ * Represents a speaker at a conference.
+ */
 package com.evenements.model;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -19,7 +21,23 @@ public class Intervenant {
 
     public Intervenant() {}
 
+    /**
+     * Constructs an Intervenant with the specified details.
+     * @param id Unique identifier of the intervenant
+     * @param nom Name of the intervenant
+     * @param specialite Specialty of the intervenant
+     * @throws IllegalArgumentException if id, nom, or specialite is invalid
+     */
     public Intervenant(String id, String nom, String specialite) {
+        if (id == null || id.trim().isEmpty()) {
+            throw new IllegalArgumentException("ID cannot be null or empty");
+        }
+        if (nom == null || nom.trim().isEmpty()) {
+            throw new IllegalArgumentException("Name cannot be null or empty");
+        }
+        if (specialite == null || specialite.trim().isEmpty()) {
+            throw new IllegalArgumentException("Specialty cannot be null or empty");
+        }
         this.id = id;
         this.nom = nom;
         this.specialite = specialite;
@@ -43,5 +61,10 @@ public class Intervenant {
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+    @Override
+    public String toString() {
+        return "Intervenant{id='" + id + "', nom='" + nom + "', specialite='" + specialite + "'}";
     }
 }

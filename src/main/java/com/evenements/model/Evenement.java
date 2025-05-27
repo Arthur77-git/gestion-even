@@ -1,3 +1,6 @@
+/**
+ * Abstract base class for events, supporting participant management and notifications.
+ */
 package com.evenements.model;
 
 import com.evenements.exception.CapaciteMaxAtteinteException;
@@ -54,13 +57,39 @@ public abstract class Evenement implements EvenementObservable {
         this.annule = false;
     }
 
+    /**
+     * Constructs an Evenement with the specified details.
+     * @param id Unique identifier of the event
+     * @param nom Name of the event
+     * @param date Date and time of the event
+     * @param lieu Location of the event
+     * @param capaciteMax Maximum capacity of the event
+     * @throws IllegalArgumentException if parameters are invalid
+     */
     public Evenement(String id, String nom, LocalDateTime date, String lieu, int capaciteMax) {
-        this();
+        if (id == null || id.trim().isEmpty()) {
+            throw new IllegalArgumentException("ID cannot be null or empty");
+        }
+        if (nom == null || nom.trim().isEmpty()) {
+            throw new IllegalArgumentException("Name cannot be null or empty");
+        }
+        if (date == null) {
+            throw new IllegalArgumentException("Date cannot be null");
+        }
+        if (lieu == null || lieu.trim().isEmpty()) {
+            throw new IllegalArgumentException("Location cannot be null or empty");
+        }
+        if (capaciteMax <= 0) {
+            throw new IllegalArgumentException("Maximum capacity must be positive");
+        }
         this.id = id;
         this.nom = nom;
         this.date = date;
         this.lieu = lieu;
         this.capaciteMax = capaciteMax;
+        this.participants = new ArrayList<>();
+        this.observers = new ArrayList<>();
+        this.annule = false;
     }
 
     public void ajouterParticipant(Participant participant) throws CapaciteMaxAtteinteException, ParticipantDejaInscritException {
@@ -90,13 +119,21 @@ public abstract class Evenement implements EvenementObservable {
         notifierObservers("L'événement " + nom + " a été annulé");
     }
 
+    /**
+     * Modifies the event details and notifies observers.
+     * @param nouveauNom New name of the event
+     * @param nouvelleDate New date of the event
+     * @param nouveauLieu New location of the event
+     * @throws IllegalStateException if the event is canceled
+     */
     public void modifierEvenement(String nouveauNom, LocalDateTime nouvelleDate, String nouveauLieu) {
-        if (!annule) {
-            this.nom = nouveauNom != null ? nouveauNom : this.nom;
-            this.date = nouvelleDate != null ? nouvelleDate : this.date;
-            this.lieu = nouveauLieu != null ? nouveauLieu : this.lieu;
-            notifierObservers("L'événement " + nom + " a été modifié");
+        if (annule) {
+            throw new IllegalStateException("Cannot modify a canceled event");
         }
+        this.nom = nouveauNom != null ? nouveauNom : this.nom;
+        this.date = nouvelleDate != null ? nouvelleDate : this.date;
+        this.lieu = nouveauLieu != null ? nouveauLieu : this.lieu;
+        notifierObservers("L'événement " + nom + " a été modifié");
     }
 
     @Override
@@ -113,7 +150,7 @@ public abstract class Evenement implements EvenementObservable {
 
     @Override
     public void notifierObservers(String message) {
-        observers.forEach(observer -> observer.update(message));
+        observers.stream().forEach(observer -> observer.update(message));
     }
 
     public abstract void afficherDetails();

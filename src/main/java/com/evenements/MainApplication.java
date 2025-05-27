@@ -13,6 +13,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * Main application class to demonstrate the event management system.
+ */
 public class MainApplication {
 
     public static void main(String[] args) {

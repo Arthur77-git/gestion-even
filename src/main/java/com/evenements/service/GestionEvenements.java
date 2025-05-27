@@ -7,6 +7,9 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+/**
+ * Singleton service for managing events.
+ */
 public class GestionEvenements {
     private static volatile GestionEvenements instance;
     private final Map<String, Evenement> evenements;
