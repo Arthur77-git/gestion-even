@@ -1,0 +1,31 @@
+[ {
+  "id" : "GAEGGW",
+  "nom" : "THRTSgre",
+  "date" : [ 2025, 6, 6, 9, 0 ],
+  "lieu" : "dge",
+  "capaciteMax" : 246,
+  "annule" : false,
+  "participants" : [ ],
+  "theme" : "rwgwag",
+  "intervenants" : [ ]
+}, {
+  "id" : "erg",
+  "nom" : "gregw",
+  "date" : [ 2025, 6, 3, 9, 0 ],
+  "lieu" : "grg",
+  "capaciteMax" : 2424,
+  "annule" : false,
+  "participants" : [ ],
+  "artiste" : "gerag",
+  "genreMusical" : "geg"
+}, {
+  "id" : "greg",
+  "nom" : "sf",
+  "date" : [ 2025, 6, 4, 9, 0 ],
+  "lieu" : "SA",
+  "capaciteMax" : 45,
+  "annule" : false,
+  "participants" : [ ],
+  "theme" : "GRAEG",
+  "intervenants" : [ ]
+} ]

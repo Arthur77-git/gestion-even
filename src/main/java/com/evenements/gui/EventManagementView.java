@@ -31,7 +31,7 @@ public class EventManagementView {
 
         HBox toolbar = createToolbar();
         eventsTable = createEventsTable();
-        refreshTable(); // Ensure table is populated on startup
+        eventsTable.setItems(controller.getAllEvents()); // Explicitly set items on startup
 
         mainContent.getChildren().addAll(title, toolbar, eventsTable);
         root.setCenter(mainContent);

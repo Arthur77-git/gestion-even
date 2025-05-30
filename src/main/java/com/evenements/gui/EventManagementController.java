@@ -16,6 +16,7 @@ public class EventManagementController {
     }
 
     public ObservableList<Evenement> getAllEvents() {
+        gestionEvenements.loadEventsFromFile();
         return FXCollections.observableArrayList(gestionEvenements.getTousLesEvenements());
     }
 

@@ -1,27 +1,31 @@
 package com.evenements.serialization;
 
 import com.evenements.model.Evenement;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
+import java.util.Map;
+
+import com.evenements.model.Evenement;
 
 public class JsonSerializer {
-    private final ObjectMapper objectMapper;
+    private static ObjectMapper objectMapper = new ObjectMapper();
 
-    public JsonSerializer() {
-        this.objectMapper = new ObjectMapper();
-        this.objectMapper.registerModule(new JavaTimeModule());
+    static{
+        objectMapper.registerModule(new JavaTimeModule());
     }
 
-    public void sauvegarderEvenements(List<Evenement> evenements, String filepath) throws IOException {
-        objectMapper.writeValue(new File(filepath), evenements);
+    public static void sauvegarderEvenements(Map<String, Evenement> evenements, String filepath) throws IOException {
+        objectMapper.writerFor(new TypeReference<Map<String, Evenement>>() {
+        }).withDefaultPrettyPrinter().writeValue(new File(filepath), evenements);
     }
 
-    public List<Evenement> chargerEvenements(String filepath) throws IOException {
+    public static Map<String, Evenement> chargerEvenements(String filepath) throws IOException {
         return objectMapper.readValue(new File(filepath),
-                objectMapper.getTypeFactory().constructCollectionType(List.class, Evenement.class));
+                new TypeReference<Map<String, Evenement>>() {
+                });
     }
 }
