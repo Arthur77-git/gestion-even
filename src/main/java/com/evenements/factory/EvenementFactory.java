@@ -1,32 +1,31 @@
 package com.evenements.factory;
 
-import com.evenements.model.*;
-import com.evenements.service.NotificationService;
+import com.evenements.model.Concert;
+import com.evenements.model.Conference;
+import com.evenements.model.Evenement;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
 
 public class EvenementFactory {
-
-    public static Evenement creerEvenement(String type, String id, String nom, LocalDateTime date,
-                                           String lieu, int capaciteMax, String... params) {
+    public static Evenement createEvenement(String type, String id, String nom, LocalDateTime date, String lieu, int capaciteMax, String... details) {
         switch (type.toLowerCase()) {
             case "conference":
-                String theme = params.length > 0 ? params[0] : "Thème général";
-                return new Conference(id, nom, date, lieu, capaciteMax, theme);
+                String theme = details.length > 0 ? details[0] : "";
+                List<String> intervenants = details.length > 1 ? Arrays.asList(details[1].split(",")) : Arrays.asList();
+                return new Conference(id, nom, date, lieu, capaciteMax, theme, intervenants);
             case "concert":
-                String artiste = params.length > 0 ? params[0] : "Artiste inconnu";
-                String genre = params.length > 1 ? params[1] : "Genre inconnu";
+                String artiste = details.length > 0 ? details[0] : "";
+                String genre = details.length > 1 ? details[1] : "";
                 return new Concert(id, nom, date, lieu, capaciteMax, artiste, genre);
             default:
-                throw new IllegalArgumentException("Type d'événement non supporté: " + type);
+                return new Evenement(id, nom, date, lieu, capaciteMax) {
+                    @Override
+                    public void afficherDetails() {
+                        System.out.println("Événement: " + getNom());
+                    }
+                };
         }
-    }
-
-    public static Participant creerParticipant(String id, String nom, String email, NotificationService notificationService) {
-        return new Participant(id, nom, email/*, notificationService*/);
-    }
-
-    public static Organisateur creerOrganisateur(String id, String nom, String email, NotificationService notificationService) {
-        return new Organisateur(id, nom, email/*, notificationService*/);
     }
 }

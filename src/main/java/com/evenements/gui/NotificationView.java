@@ -1,65 +1,88 @@
 package com.evenements.gui;
 
-import com.evenements.model.Evenement;
-import com.evenements.service.EmailNotificationService;
-import com.evenements.singleton.GestionEvenements;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class NotificationView {
     private BorderPane root;
-    private GestionEvenements gestion;
+    private NotificationController controller;
+    private ListView<NotificationItem> notificationsList;
+    private ObservableList<NotificationItem> items;
 
     public NotificationView() {
-        gestion = GestionEvenements.getInstance();
+        this.controller = new NotificationController();
+        this.items = FXCollections.observableArrayList();
         initializeUI();
     }
 
     private void initializeUI() {
         root = new BorderPane();
-        root.setPadding(new Insets(15));
+        root.getStyleClass().add("notification-container");
+        root.setPadding(new Insets(20));
 
-        HBox form = new HBox(10);
-        form.setPadding(new Insets(10));
+        VBox header = createHeader();
+        root.setTop(header);
 
-        ComboBox<String> eventCombo = new ComboBox<>();
-        gestion.getTousLesEvenements().forEach(e -> eventCombo.getItems().add(e.getId() + " - " + e.getNom()));
-        eventCombo.setPromptText("Sélectionner un événement");
-
-        TextArea messageField = new TextArea();
-        messageField.setPromptText("Entrez votre message...");
-        messageField.setPrefRowCount(3);
-
-        Button sendButton = new Button("📤 Envoyer");
-        sendButton.setOnAction(e -> {
-            if (eventCombo.getValue() != null && !messageField.getText().isEmpty()) {
-                String eventId = eventCombo.getValue().split(" - ")[0];
-                Evenement event = gestion.rechercherEvenement(eventId).orElse(null);
-                if (event != null) {
-                    EmailNotificationService service = new EmailNotificationService();
-                    event.getParticipants().forEach(p ->
-                            service.envoyerNotificationAsync("Notification pour " + p.getNom() + " (" + p.getEmail() + "): " + messageField.getText()));
-                    showAlert("Succès", "Notifications envoyées");
-                }
-            } else {
-                showAlert("Erreur", "Veuillez sélectionner un événement et entrer un message");
-            }
-        });
-
-        form.getChildren().addAll(eventCombo, messageField, sendButton);
-        root.setTop(form);
-
-        ListView<String> logList = new ListView<>();
-        logList.getItems().add("Notifications envoyées...");
-        root.setCenter(logList);
+        SplitPane mainContent = createMainContent();
+        root.setCenter(mainContent);
     }
 
-    private void showAlert(String title, String message) {
-        new Alert(Alert.AlertType.INFORMATION, message).showAndWait();
+    private VBox createHeader() {
+        VBox header = new VBox(10);
+        header.setAlignment(Pos.CENTER_LEFT);
+        Label title = new Label("Notifications");
+        title.getStyleClass().add("panel-title");
+        Button clearButton = new Button("Effacer Tout");
+        clearButton.getStyleClass().addAll("btn", "btn-secondary");
+        clearButton.setOnAction(e -> items.clear());
+        header.getChildren().addAll(title, clearButton);
+        return header;
+    }
+
+    private SplitPane createMainContent() {
+        SplitPane splitPane = new SplitPane();
+        notificationsList = new ListView<>(items);
+        notificationsList.getStyleClass().add("notifications-list");
+        notificationsList.setCellFactory(lv -> new ListCell<NotificationItem>() {
+            @Override
+            protected void updateItem(NotificationItem item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(item.getTimestamp().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) +
+                            ": " + item.getMessage());
+                }
+            }
+        });
+        splitPane.getItems().add(notificationsList);
+        return splitPane;
+    }
+
+    public void addNotification(String message) {
+        items.add(new NotificationItem(message, LocalDateTime.now()));
     }
 
     public BorderPane getRoot() {
         return root;
+    }
+
+    public static class NotificationItem {
+        private String message;
+        private LocalDateTime timestamp;
+
+        public NotificationItem(String message, LocalDateTime timestamp) {
+            this.message = message;
+            this.timestamp = timestamp;
+        }
+
+        public String getMessage() { return message; }
+        public LocalDateTime getTimestamp() { return timestamp; }
     }
 }

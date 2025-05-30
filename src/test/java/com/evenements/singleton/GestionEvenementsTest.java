@@ -1,6 +1,114 @@
 package com.evenements.singleton;
 
 import com.evenements.model.Conference;
+import com.evenements.model.Concert;
+import com.evenements.exception.EvenementDejaExistantException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class GestionEvenementsTest {
+    private GestionEvenements gestion;
+
+    @BeforeEach
+    void setUp() {
+        gestion = GestionEvenements.getInstance();
+        gestion.viderTousLesEvenements();
+    }
+
+    @Test
+    void testAjouterEvenement() throws EvenementDejaExistantException {
+        Conference conference = new Conference("E001", "Conf Tech", LocalDateTime.now(), "Paris", 100, "IA", Arrays.asList("Dr. Dupont"));
+        gestion.ajouterEvenement(conference);
+        assertEquals(1, gestion.getNombreEvenements());
+        assertTrue(gestion.rechercherEvenement("E001").isPresent());
+    }
+
+    @Test
+    void testAjouterEvenementDejaExistant() {
+        Conference conference = new Conference("E001", "Conf Tech", LocalDateTime.now(), "Paris", 100, "IA", Arrays.asList("Dr. Dupont"));
+        assertDoesNotThrow(() -> gestion.ajouterEvenement(conference));
+        assertThrows(EvenementDejaExistantException.class, () -> gestion.ajouterEvenement(conference));
+    }
+
+    @Test
+    void testSupprimerEvenement() throws EvenementDejaExistantException {
+        Conference conference = new Conference("E001", "Conf Tech", LocalDateTime.now(), "Paris", 100, "IA", Arrays.asList("Dr. Dupont"));
+        gestion.ajouterEvenement(conference);
+        assertTrue(gestion.supprimerEvenement("E001"));
+        assertEquals(0, gestion.getNombreEvenements());
+        assertFalse(gestion.rechercherEvenement("E001").isPresent());
+    }
+
+    @Test
+    void testSupprimerEvenementInexistant() {
+        assertFalse(gestion.supprimerEvenement("E999"));
+    }
+
+    @Test
+    void testRechercherEvenement() throws EvenementDejaExistantException {
+        Conference conference = new Conference("E001", "Conf Tech", LocalDateTime.now(), "Paris", 100, "IA", Arrays.asList("Dr. Dupont"));
+        gestion.ajouterEvenement(conference);
+        assertTrue(gestion.rechercherEvenement("E001").isPresent());
+        assertEquals("Conf Tech", gestion.rechercherEvenement("E001").get().getNom());
+        assertFalse(gestion.rechercherEvenement("E999").isPresent());
+    }
+
+    @Test
+    void testRechercherParNom() throws EvenementDejaExistantException {
+        Conference conference1 = new Conference("E001", "Conf Tech 2025", LocalDateTime.now(), "Paris", 100, "IA", Arrays.asList("Dr. Dupont"));
+        Conference conference2 = new Conference("E002", "Conf Bio 2025", LocalDateTime.now(), "Lyon", 50, "Bio", Arrays.asList("Dr. Martin"));
+        gestion.ajouterEvenement(conference1);
+        gestion.ajouterEvenement(conference2);
+        List<?> result = gestion.rechercherParNom("Tech");
+        assertEquals(1, result.size());
+        assertEquals("Conf Tech 2025", result.get(0).getNom());
+    }
+
+    @Test
+    void testRechercherParLieu() throws EvenementDejaExistantException {
+        Conference conference = new Conference("E001", "Conf Tech", LocalDateTime.now(), "Paris", 100, "IA", Arrays.asList("Dr. Dupont"));
+        gestion.ajouterEvenement(conference);
+        List<?> result = gestion.rechercherParLieu("Paris");
+        assertEquals(1, result.size());
+        assertEquals("Paris", result.get(0).getLieu());
+    }
+
+    @Test
+    void testGetEvenementsActifs() throws EvenementDejaExistantException {
+        Conference conference = new Conference("E001", "Conf Tech", LocalDateTime.now(), "Paris", 100, "IA", Arrays.asList("Dr. Dupont"));
+        Concert concert = new Concert("E002", "Jazz Night", LocalDateTime.now(), "Lyon", 200, "Ella Jazz", "Jazz");
+        gestion.ajouterEvenement(conference);
+        gestion.ajouterEvenement(concert);
+        concert.annuler();
+        assertEquals(1, gestion.getEvenementsActifs().size());
+        assertEquals("Conf Tech", gestion.getEvenementsActifs().get(0).getNom());
+    }
+
+    @Test
+    void testGetTousLesEvenements() throws EvenementDejaExistantException {
+        Conference conference = new Conference("E001", "Conf Tech", LocalDateTime.now(), "Paris", 100, "IA", Arrays.asList("Dr. Dupont"));
+        Concert concert = new Concert("E002", "Jazz Night", LocalDateTime.now(), "Lyon", 200, "Ella Jazz", "Jazz");
+        gestion.ajouterEvenement(conference);
+        gestion.ajouterEvenement(concert);
+        assertEquals(2, gestion.getTousLesEvenements().size());
+    }
+
+    @Test
+    void testViderTousLesEvenements() throws EvenementDejaExistantException {
+        Conference conference = new Conference("E001", "Conf Tech", LocalDateTime.now(), "Paris", 100, "IA", Arrays.asList("Dr. Dupont"));
+        gestion.ajouterEvenement(conference);
+        gestion.viderTousLesEvenements();
+        assertEquals(0, gestion.getNombreEvenements());
+    }
+}package com.evenements.singleton;
+
+import com.evenements.model.Conference;
 import com.evenements.model.Evenement;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -110,4 +218,3 @@ public class GestionEvenementsTest {
         gestion.viderTousLesEvenements();
         assertEquals(0, gestion.getNombreEvenements());
     }
-}

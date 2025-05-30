@@ -1,0 +1,19 @@
+[ {
+  "id" : "dsz",
+  "nom" : "xj",
+  "date" : [ 2025, 5, 9, 9, 0 ],
+  "lieu" : "zcm",
+  "capaciteMax" : 32,
+  "annule" : false,
+  "participants" : [ ]
+}, {
+  "id" : "ds",
+  "nom" : "cz",
+  "date" : [ 2025, 5, 16, 1, 0 ],
+  "lieu" : "zcx",
+  "capaciteMax" : 12,
+  "annule" : false,
+  "participants" : [ ],
+  "theme" : "ad",
+  "intervenants" : [ "fs" ]
+} ]

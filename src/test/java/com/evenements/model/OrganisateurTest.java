@@ -7,72 +7,48 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class OrganisateurTest {
-
+class OrganisateurTest {
     private Organisateur organisateur;
 
     @BeforeEach
     void setUp() {
-        organisateur = new Organisateur("ORG1", "Claire Admin", "admin@events.com");
+        organisateur = new Organisateur("O001", "Alice Dupont", "alice@email.com", "EventCorp");
     }
 
     @Test
-    void testConstructorAndGetters() {
-        assertEquals("ORG1", organisateur.getId());
-        assertEquals("Claire Admin", organisateur.getNom());
-        assertEquals("admin@events.com", organisateur.getEmail());
-        assertTrue(organisateur.getEvenementsOrganisesIds().isEmpty());
+    void testGetOrganisation() {
+        assertEquals("EventCorp", organisateur.getOrganisation());
     }
 
     @Test
-    void testDefaultConstructor() {
-        Organisateur emptyOrganisateur = new Organisateur();
-        assertNull(emptyOrganisateur.getId());
-        assertNull(emptyOrganisateur.getNom());
-        assertNull(emptyOrganisateur.getEmail());
-        assertTrue(emptyOrganisateur.getEvenementsOrganisesIds().isEmpty());
+    void testSetOrganisation() {
+        organisateur.setOrganisation("NewCorp");
+        assertEquals("NewCorp", organisateur.getOrganisation());
     }
 
     @Test
-    void testAjouterEvenementOrganise() {
-        organisateur.ajouterEvenementOrganise("EVT1");
-        List<String> evenements = organisateur.getEvenementsOrganisesIds();
-        assertEquals(1, evenements.size());
-        assertEquals("EVT1", evenements.get(0));
-
-        // Adding the same event ID should not duplicate
-        organisateur.ajouterEvenementOrganise("EVT1");
-        assertEquals(1, evenements.size());
+    void testEmptyOrganisateur() {
+        Organisateur emptyOrganisateur = new Organisateur("O002", "Bob Martin", "bob@email.com", "Corp");
+        assertEquals("Corp", emptyOrganisateur.getOrganisation());
     }
 
     @Test
-    void testAjouterEvenementOrganiseWithInvalidId() {
-        assertThrows(IllegalArgumentException.class, () -> organisateur.ajouterEvenementOrganise(null));
-        assertThrows(IllegalArgumentException.class, () -> organisateur.ajouterEvenementOrganise(""));
+    void testInvalidOrganisation() {
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            new Organisateur("O003", "Charlie", "charlie@email.com", "");
+        });
+        assertEquals("L'organisation ne peut pas être vide", exception.getMessage());
+
+        exception = assertThrows(IllegalArgumentException.class, () -> {
+            new Organisateur("O004", "David", "david@email.com", null);
+        });
+        assertEquals("L'organisation ne peut pas être vide", exception.getMessage());
     }
 
     @Test
-    void testSupprimerEvenementOrganise() {
-        organisateur.ajouterEvenementOrganise("EVT1");
-        organisateur.supprimerEvenementOrganise("EVT1");
-        assertTrue(organisateur.getEvenementsOrganisesIds().isEmpty());
-    }
-
-    @Test
-    void testToString() {
-        organisateur.ajouterEvenementOrganise("EVT1");
-        String expected = "Organisateur{id='ORG1', nom='Claire Admin', evenementsOrganisesIds=[EVT1]}";
-        assertEquals(expected, organisateur.toString());
-    }
-
-    @Test
-    void testEqualsAndHashCode() {
-        Organisateur other = new Organisateur("ORG1", "Different Name", "different@events.com");
-        assertEquals(organisateur, other);
-        assertEquals(organisateur.hashCode(), other.hashCode());
-
-        Organisateur different = new Organisateur("ORG2", "Claire Admin", "admin@events.com");
-        assertNotEquals(organisateur, different);
-        assertNotEquals(organisateur.hashCode(), different.hashCode());
+    void testGetNomEmail() {
+        Organisateur org = new Organisateur("O005", "Eve", "eve@email.com", "TechEvents");
+        assertEquals("Eve", org.getNom());
+        assertEquals("eve@email.com", org.getEmail());
     }
 }

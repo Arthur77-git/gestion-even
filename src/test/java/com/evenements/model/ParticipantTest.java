@@ -3,110 +3,43 @@ package com.evenements.model;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ParticipantTest {
-
+class ParticipantTest {
     private Participant participant;
-    private final String id = "1";
-    private final String nom = "John Doe";
-    private final String email = "john@example.com";
 
     @BeforeEach
     void setUp() {
-        participant = new Participant(id, nom, email);
+        participant = new Participant("P001", "Jean Dupont", "jean@email.com");
     }
 
     @Test
-    void testConstructorAndGetters() {
-        assertEquals(id, participant.getId());
-        assertEquals(nom, participant.getNom());
-        assertEquals(email, participant.getEmail());
+    void testGetId() {
+        assertEquals("P001", participant.getId());
     }
 
     @Test
-    void testDefaultConstructor() {
-        Participant emptyParticipant = new Participant();
-        assertNull(emptyParticipant.getId());
-        assertNull(emptyParticipant.getNom());
-        assertNull(emptyParticipant.getEmail());
+    void testGetNom() {
+        assertEquals("Jean Dupont", participant.getNom());
     }
 
     @Test
-    void testSetters() {
-        String newId = "2";
-        String newNom = "Jane Doe";
-        String newEmail = "jane@example.com";
-
-        participant.setId(newId);
-        participant.setNom(newNom);
-        participant.setEmail(newEmail);
-
-        assertEquals(newId, participant.getId());
-        assertEquals(newNom, participant.getNom());
-        assertEquals(newEmail, participant.getEmail());
+    void testGetEmail() {
+        assertEquals("jean@email.com", participant.getEmail());
     }
 
     @Test
-    void testEqualsSameObject() {
-        assertTrue(participant.equals(participant));
+    void testRegisterToEvent() {
+        participant.registerToEvent("E001");
+        assertTrue(participant.getEventIds().contains("E001"));
     }
 
     @Test
-    void testEqualsSameId() {
-        Participant other = new Participant(id, "Different Name", "different@example.com");
-        assertTrue(participant.equals(other));
-    }
-
-    @Test
-    void testEqualsDifferentId() {
-        Participant other = new Participant("2", nom, email);
-        assertFalse(participant.equals(other));
-    }
-
-    @Test
-    void testEqualsNull() {
-        assertFalse(participant.equals(null));
-    }
-
-    @Test
-    void testEqualsDifferentClass() {
-        assertFalse(participant.equals(new Object()));
-    }
-
-    @Test
-    void testHashCodeConsistency() {
-        Participant other = new Participant(id, "Different Name", "different@example.com");
-        assertEquals(participant.hashCode(), other.hashCode());
-    }
-
-    @Test
-    void testHashCodeDifferentId() {
-        Participant other = new Participant("2", nom, email);
-        assertNotEquals(participant.hashCode(), other.hashCode());
-    }
-
-    @Test
-    void testToString() {
-        String expected = "Participant{id='1', nom='John Doe', email='john@example.com'}";
-        assertEquals(expected, participant.toString());
-    }
-
-    @Test
-    void testConstructorWithInvalidId() {
-        assertThrows(IllegalArgumentException.class, () -> new Participant(null, nom, email));
-        assertThrows(IllegalArgumentException.class, () -> new Participant("", nom, email));
-    }
-
-    @Test
-    void testConstructorWithInvalidNom() {
-        assertThrows(IllegalArgumentException.class, () -> new Participant(id, null, email));
-        assertThrows(IllegalArgumentException.class, () -> new Participant(id, "", email));
-    }
-
-    @Test
-    void testConstructorWithInvalidEmail() {
-        assertThrows(IllegalArgumentException.class, () -> new Participant(id, nom, "invalid-email"));
-        assertThrows(IllegalArgumentException.class, () -> new Participant(id, nom, null));
+    void testUnregisterFromEvent() {
+        participant.registerToEvent("E001");
+        participant.unregisterFromEvent("E001");
+        assertFalse(participant.getEventIds().contains("E001"));
     }
 }

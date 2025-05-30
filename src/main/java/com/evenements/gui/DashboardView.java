@@ -1,88 +1,111 @@
 package com.evenements.gui;
 
-import com.evenements.model.Concert;
-import com.evenements.model.Conference;
-import com.evenements.model.Evenement;
-import com.evenements.singleton.GestionEvenements;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.chart.BarChart;
+import javafx.scene.chart.CategoryAxis;
+import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.PieChart;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.*;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 public class DashboardView {
     private BorderPane root;
-    private GestionEvenements gestion;
+    private DashboardController controller;
 
     public DashboardView() {
-        gestion = GestionEvenements.getInstance();
+        this.controller = new DashboardController();
         initializeUI();
     }
 
     private void initializeUI() {
         root = new BorderPane();
+        root.getStyleClass().add("dashboard-container");
         root.setPadding(new Insets(20));
 
         VBox mainContent = new VBox(20);
-        mainContent.getChildren().addAll(createStatsCards(), createPieChartSection());
+        mainContent.setAlignment(Pos.TOP_CENTER);
+
+        Label title = new Label("Tableau de Bord");
+        title.getStyleClass().add("dashboard-title");
+
+        Button refreshButton = new Button("Actualiser");
+        refreshButton.getStyleClass().addAll("btn", "btn-primary");
+        refreshButton.setOnAction(e -> controller.refreshDashboard());
+
+        GridPane metricsGrid = createMetricsGrid();
+        HBox chartsBox = createChartsBox();
+
+        mainContent.getChildren().addAll(title, refreshButton, metricsGrid, chartsBox);
         root.setCenter(mainContent);
     }
 
-    private HBox createStatsCards() {
-        HBox statsContainer = new HBox(20);
-        statsContainer.setAlignment(Pos.CENTER);
+    private GridPane createMetricsGrid() {
+        GridPane grid = new GridPane();
+        grid.getStyleClass().add("metrics-grid");
+        grid.setHgap(20);
+        grid.setVgap(20);
+        grid.setAlignment(Pos.CENTER);
 
-        statsContainer.getChildren().addAll(
-                createStatsCard("Événements Totaux", String.valueOf(gestion.getNombreEvenements()), "📅"),
-                createStatsCard("Événements Actifs", String.valueOf(gestion.getEvenementsActifs().size()), "🎯"),
-                createStatsCard("Participants", String.valueOf(countParticipants()), "👥"),
-                createStatsCard("À venir", String.valueOf(countUpcomingEvents()), "⏰")
-        );
-        return statsContainer;
+        // Total Events Card
+        VBox totalEventsCard = createMetricCard("Événements Totaux", String.valueOf(controller.getTotalEvents()));
+        grid.add(totalEventsCard, 0, 0);
+
+        // Active Events Card
+        VBox activeEventsCard = createMetricCard("Événements Actifs", String.valueOf(controller.getActiveEvents()));
+        grid.add(activeEventsCard, 1, 0);
+
+        // Total Participants Card
+        VBox participantsCard = createMetricCard("Participants", String.valueOf(controller.getTotalParticipants()));
+        grid.add(participantsCard, 2, 0);
+
+        return grid;
     }
 
-    private VBox createStatsCard(String title, String value, String icon) {
+    private VBox createMetricCard(String title, String value) {
         VBox card = new VBox(10);
+        card.getStyleClass().add("metric-card");
         card.setAlignment(Pos.CENTER);
-        card.setPadding(new Insets(20));
-        card.setPrefWidth(200);
-        card.getStyleClass().add("stats-card");
+        card.setPadding(new Insets(15));
 
-        card.getChildren().addAll(new Label(icon), new Label(value), new Label(title));
+        Label titleLabel = new Label(title);
+        titleLabel.getStyleClass().add("metric-title");
+
+        Label valueLabel = new Label(value);
+        valueLabel.getStyleClass().add("metric-value");
+
+        card.getChildren().addAll(titleLabel, valueLabel);
         return card;
     }
 
-    private VBox createPieChartSection() {
-        VBox pieChartContainer = new VBox(10);
+    private HBox createChartsBox() {
+        HBox chartsBox = new HBox(20);
+        chartsBox.setAlignment(Pos.CENTER);
 
-        PieChart pieChart = new PieChart();
-        pieChart.setPrefSize(400, 300);
+        // Bar Chart for Events by Month
+        CategoryAxis xAxis = new CategoryAxis();
+        xAxis.setLabel("Mois");
+        NumberAxis yAxis = new NumberAxis();
+        yAxis.setLabel("Nombre d'Événements");
+        BarChart<String, Number> barChart = new BarChart<>(xAxis, yAxis);
+        barChart.setTitle("Événements par Mois");
+        barChart.getStyleClass().add("chart");
+        barChart.setData(controller.getEventsByMonthData());
+        barChart.setPrefWidth(600);
 
-        long conferences = gestion.getTousLesEvenements().stream().filter(e -> e instanceof Conference).count();
-        long concerts = gestion.getTousLesEvenements().size() - conferences;
+        // Pie Chart for Event Types
+        PieChart pieChart = new PieChart(controller.getEventTypeData());
+        pieChart.setTitle("Répartition des Types d'Événements");
+        pieChart.getStyleClass().add("chart");
+        pieChart.setPrefWidth(400);
 
-        pieChart.getData().addAll(
-                new PieChart.Data("Conférences", conferences),
-                new PieChart.Data("Concerts", concerts)
-        );
-
-        pieChartContainer.getChildren().addAll(new Label("Types d'Événements"), pieChart);
-        return pieChartContainer;
-    }
-
-    private int countParticipants() {
-        return gestion.getTousLesEvenements().stream()
-                .mapToInt(e -> e.getParticipants().size())
-                .sum();
-    }
-
-    private long countUpcomingEvents() {
-        return gestion.getEvenementsActifs().stream()
-                .filter(e -> e.getDate().isAfter(LocalDateTime.now()))
-                .count();
+        chartsBox.getChildren().addAll(barChart, pieChart);
+        return chartsBox;
     }
 
     public BorderPane getRoot() {

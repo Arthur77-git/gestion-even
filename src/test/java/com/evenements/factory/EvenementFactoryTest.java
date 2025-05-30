@@ -1,54 +1,48 @@
 package com.evenements.factory;
 
 import com.evenements.model.Conference;
+import com.evenements.model.Concert;
 import com.evenements.model.Evenement;
-import com.evenements.model.Participant;
-import com.evenements.service.NotificationService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
-import java.util.concurrent.CompletableFuture;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class EvenementFactoryTest {
-
-    @BeforeEach
-    void setUp() {
-        // No singleton reset needed for factory
+class EvenementFactoryTest {
+    @Test
+    void testCreateConference() {
+        Evenement evenement = EvenementFactory.createEvenement(
+                "conference", "E001", "Conf Tech", LocalDateTime.now(), "Paris", 100, "IA", "Dr. Dupont,Dr. Martin"
+        );
+        assertTrue(evenement instanceof Conference);
+        Conference conference = (Conference) evenement;
+        assertEquals("E001", conference.getId());
+        assertEquals("Conf Tech", conference.getNom());
+        assertEquals("IA", conference.getTheme());
+        assertEquals(2, conference.getIntervenants().size());
     }
 
     @Test
-    void testCreerConference() {
-        Evenement event = EvenementFactory.creerEvenement(
-                "conference", "C001", "Tech Conference", LocalDateTime.now(), "Room A", 100, "AI"
+    void testCreateConcert() {
+        Evenement evenement = EvenementFactory.createEvenement(
+                "concert", "E002", "Jazz Night", LocalDateTime.now(), "Lyon", 200, "Ella Jazz", "Jazz"
         );
-        assertNotNull(event);
-        assertTrue(event instanceof Conference);
-        assertEquals("C001", event.getId());
-        assertEquals("Tech Conference", event.getNom());
+        assertTrue(evenement instanceof Concert);
+        Concert concert = (Concert) evenement;
+        assertEquals("E002", concert.getId());
+        assertEquals("Jazz Night", concert.getNom());
+        assertEquals("Ella Jazz", concert.getArtiste());
+        assertEquals("Jazz", concert.getGenreMusical());
     }
 
     @Test
-    void testCreerParticipant() {
-        NotificationService mockService = new NotificationService() {
-            @Override
-            public void envoyerNotification(String message) {
-
-            }
-
-            @Override
-            public CompletableFuture<Void> envoyerNotificationAsync(String message) {
-                return CompletableFuture.completedFuture(null);
-            }
-        }; // Mock implementation
-        Participant participant = EvenementFactory.creerParticipant(
-                "P001", "John Doe", "john@example.com", mockService
+    void testCreateDefaultEvenement() {
+        Evenement evenement = EvenementFactory.createEvenement(
+                "autre", "E003", "Generic Event", LocalDateTime.now(), "Nantes", 50
         );
-        assertNotNull(participant);
-        assertEquals("P001", participant.getId());
-        assertEquals("John Doe", participant.getNom());
-        assertEquals("john@example.com", participant.getEmail());
+        assertNotNull(evenement);
+        assertEquals("E003", evenement.getId());
+        assertEquals("Generic Event", evenement.getNom());
     }
 }
